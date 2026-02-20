@@ -1,0 +1,323 @@
+{
+  "name": "My workflow 2",
+  "nodes": [
+    {
+      "parameters": {
+        "public": true,
+        "mode": "webhook",
+        "options": {
+          "allowedOrigins": "*",
+          "responseMode": "lastNode"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.chatTrigger",
+      "typeVersion": 1.3,
+      "position": [
+        -1328,
+        64
+      ],
+      "id": "7eaced31-e099-4416-94a8-ae8009e83895",
+      "name": "When chat message received",
+      "webhookId": "f8ffffb0-30e2-472a-8a84-b427401bf8a6"
+    },
+    {
+      "parameters": {
+        "operation": "pdf",
+        "binaryPropertyName": "=data0",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.extractFromFile",
+      "typeVersion": 1,
+      "position": [
+        -960,
+        -272
+      ],
+      "id": "46ae3442-b672-45a8-9dbd-38f615648769",
+      "name": "Extract from File"
+    },
+    {
+      "parameters": {
+        "jsCode": "const text = $json[\"text\"];\nconst chunkSize = 500; // adjust as needed\nconst chunks = [];\nfor (let i = 0; i < text.length; i += chunkSize) {\n  chunks.push({\n    id: `chunk-${i/chunkSize}`,\n    text: text.slice(i, i + chunkSize)\n  });\n}\nreturn chunks.map(c => ({ json: c }));\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -704,
+        -224
+      ],
+      "id": "09526af8-ee90-46ef-9392-f98ecb35d004",
+      "name": "Code in JavaScript"
+    },
+    {
+      "parameters": {
+        "modelName": "embed-english-v3.0"
+      },
+      "type": "@n8n/n8n-nodes-langchain.embeddingsCohere",
+      "typeVersion": 1,
+      "position": [
+        -336,
+        -64
+      ],
+      "id": "d7f66434-56ca-448f-82d9-5a60608e2cec",
+      "name": "Embeddings Cohere",
+      "credentials": {
+        "cohereApi": {
+          "id": "W1U6f0LH11hgmCdT",
+          "name": "CohereApi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "mode": "insert",
+        "pineconeIndex": {
+          "__rl": true,
+          "value": "pdfind",
+          "mode": "list",
+          "cachedResultName": "pdfind"
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.vectorStorePinecone",
+      "typeVersion": 1.3,
+      "position": [
+        -336,
+        -336
+      ],
+      "id": "5b73b473-850d-4983-bf00-83f32dcf3806",
+      "name": "Pinecone Vector Store",
+      "credentials": {
+        "pineconeApi": {
+          "id": "KXsWYdKxT9Hzbu1z",
+          "name": "PineconeApi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.documentDefaultDataLoader",
+      "typeVersion": 1.1,
+      "position": [
+        -112,
+        -112
+      ],
+      "id": "fc1f9f7f-6886-42e4-b153-0e45f794046e",
+      "name": "Default Data Loader"
+    },
+    {
+      "parameters": {
+        "model": "llama-3.3-70b-versatile",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGroq",
+      "typeVersion": 1,
+      "position": [
+        -976,
+        352
+      ],
+      "id": "a90ecad9-87b8-4892-a5a9-49432df88f7c",
+      "name": "Groq Chat Model",
+      "credentials": {
+        "groqApi": {
+          "id": "r3Qhk28WtNcKTmUB",
+          "name": "Groq account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "mode": "retrieve-as-tool",
+        "toolDescription": "Use this tool to search for information specifically contained within the uploaded PDF journals and documents. Use it whenever the user asks about the content of the files.",
+        "pineconeIndex": {
+          "__rl": true,
+          "value": "pdfind",
+          "mode": "list",
+          "cachedResultName": "pdfind"
+        },
+        "topK": 3,
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.vectorStorePinecone",
+      "typeVersion": 1.3,
+      "position": [
+        -576,
+        304
+      ],
+      "id": "9ba2fbf1-1dd1-49d7-8fb0-0d2019c3d131",
+      "name": "Pinecone Vector Store2",
+      "credentials": {
+        "pineconeApi": {
+          "id": "KXsWYdKxT9Hzbu1z",
+          "name": "PineconeApi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "modelName": "embed-english-v3.0"
+      },
+      "type": "@n8n/n8n-nodes-langchain.embeddingsCohere",
+      "typeVersion": 1,
+      "position": [
+        -592,
+        512
+      ],
+      "id": "371bdbbf-7bfc-491a-95a9-889f180c8e4c",
+      "name": "Embeddings Cohere1",
+      "credentials": {
+        "cohereApi": {
+          "id": "W1U6f0LH11hgmCdT",
+          "name": "CohereApi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sessionIdType": "customKey",
+        "sessionKey": "=={{ $json.sessionId || $execution.id }}"
+      },
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "typeVersion": 1.3,
+      "position": [
+        -768,
+        400
+      ],
+      "id": "56b091d2-0cea-4085-b249-b69e0800d476",
+      "name": "Simple Memory"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Tell me more about the files according to the input {{ $json.chatInput }}",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        -752,
+        160
+      ],
+      "id": "3e951c67-f130-49d4-aea3-dc0744a66ce8",
+      "name": "AI Agent"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "When chat message received": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract from File": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript": {
+      "main": [
+        [
+          {
+            "node": "Pinecone Vector Store",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Embeddings Cohere": {
+      "ai_embedding": [
+        [
+          {
+            "node": "Pinecone Vector Store",
+            "type": "ai_embedding",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Default Data Loader": {
+      "ai_document": [
+        [
+          {
+            "node": "Pinecone Vector Store",
+            "type": "ai_document",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Groq Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Pinecone Vector Store2": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Embeddings Cohere1": {
+      "ai_embedding": [
+        [
+          {
+            "node": "Pinecone Vector Store2",
+            "type": "ai_embedding",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Simple Memory": {
+      "ai_memory": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false,
+    "timeSavedMode": "fixed",
+    "callerPolicy": "workflowsFromSameOwner"
+  },
+  "versionId": "3f1c94c2-bfed-44de-81c2-48c5d9a08e9d",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "41562b30c48fbff43f6346492094aa74b1c645c13750cbbed694dd1bbde3b0d2"
+  },
+  "id": "ykEfOV2bTqUwcnLU",
+  "tags": []
+}
